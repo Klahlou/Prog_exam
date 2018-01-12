@@ -55,17 +55,62 @@ double f(double r,double c, double d, double PV, double FV, int N) // Formula of
 
 
 // YTM 
+double YTM(double c, double d, double FV, double PV, int N) {
 
-void YTM() {
-
-    int N;
-    double c,d,r0,r1,FV,PV,PV1;
-
+    double r0,r1, PV1;
 //r0 = approximate YTM * 0.95 
 //r1 = approximate YTM
+//starting value in iteration algorithm
+    c=c*FV/100; 
+    r1=(c+(FV-PV)/(N+d))/((FV+PV)/2); // Approximate YTM
+    r0=0.95*r1;
 
-// ask user the data of the bond
+    if (c==0)
+    {
+        while (fabs(PV1-PV)/PV1 > 0.0001 ) //the relative error should be below 0.01%
+        {
+            r1-=f(r1,c,d,PV,FV,N)*(r1-r0)/(f(r1,c,d,PV,FV,N)-f(r0,c,d,PV,FV,N)); // calculation of the new approximated rate with respect to the Newton method                                
+            PV1=Pzc(FV,d,N,r1); // calculation of the new approximated price of the bond
+        }
+    }
+    else if (d==0)
+    { 
+        while (fabs(PV1-PV)/PV1 > 0.0001 )
+        {
+            r1-=f(r1,c,d,PV,FV,N)*(r1-r0)/(f(r1,c,d,PV,FV,N)-f(r0,c,d,PV,FV,N));
+            PV1=Pd(FV,c,N,r1);
+        } 
+    }
+    else if (PV==FV)
+    { 
+        while (fabs(PV1-PV)/PV1 > 0.0001 )
+        {
+            r1-=f(r1,c,d,PV,FV,N)*(r1-r0)/(f(r1,c,d,PV,FV,N)-f(r0,c,d,PV,FV,N));                 
+            PV1=PFV(c,d,N,r1);
+        }             
+    }
+    else
+    {
+        while (fabs(PV1-PV)/PV1 > 0.0001 )
+        {
+            r1-=f(r1,c,d,PV,FV,N)*(r1-r0)/(f(r1,c,d,PV,FV,N)-f(r0,c,d,PV,FV,N));
+            PV1=P(FV,d,c,N,r1);
+        }
+    }
 
+    //Result
+    return r1;
+    
+}
+
+int main()
+{
+    
+    double c, d, FV, PV;
+    int N;
+    double r;
+    
+    // ask user the data of the bond
     cout << "provide:" << endl;
     cout << "-> the coupon rate" << endl;
     cin >> c ;
@@ -85,7 +130,8 @@ void YTM() {
         cout << "year fraction should be between 0 and 1!" << endl;
         cin >> d;
     }
-     
+    
+      
     cout << "-> the face value of the bond:" << endl;
     cin >> FV;
     // FV should be positive 
@@ -111,77 +157,7 @@ void YTM() {
         cout << "Number of full years should be positive!" << endl;
         cin >> N;
     }
- 
-
-//starting value in iteration algorithm
-
-    c=c*FV/100; 
-    r1=(c+(FV-PV)/(N+d))/((FV+PV)/2); // Approximate YTM
-    r0=0.95*r1;
-
-
-        if (c==0)
-        {
-            while (fabs(PV1-PV)/PV1 > 0.0001 ) //the relative error should be below 0.01%
-            {
-
-                r1-=f(r1,c,d,PV,FV,N)*(r1-r0)/(f(r1,c,d,PV,FV,N)-f(r0,c,d,PV,FV,N)); // calculation of the new approximated rate with respect to the Newton method
-                                
-                PV1=Pzc(FV,d,N,r1); // calculation of the new approximated price of the bond
-            }
-        }
-        else if (d==0)
-        { 
-            while (fabs(PV1-PV)/PV1 > 0.0001 )
-            {
-
-                r1-=f(r1,c,d,PV,FV,N)*(r1-r0)/(f(r1,c,d,PV,FV,N)-f(r0,c,d,PV,FV,N));
-                            
-                PV1=Pd(FV,c,N,r1);
-            }
-             
-        }
-        else if (PV==FV)
-        { 
-            while (fabs(PV1-PV)/PV1 > 0.0001 )
-            {
-
-                r1-=f(r1,c,d,PV,FV,N)*(r1-r0)/(f(r1,c,d,PV,FV,N)-f(r0,c,d,PV,FV,N));
-                            
-                PV1=PFV(c,d,N,r1);
-            }             
-        }
-        else
-        {
-            while (fabs(PV1-PV)/PV1 > 0.0001 )
-            {
-
-                r1-=f(r1,c,d,PV,FV,N)*(r1-r0)/(f(r1,c,d,PV,FV,N)-f(r0,c,d,PV,FV,N));
-                    
-                PV1=P(FV,d,c,N,r1);
-            }
-        }
-
-    //Result
     
-    cout << "The Yield to maturity for these arguments is " << r1 << " (equivalently " << r1*100 << "% )" << endl;
-
+    r = YTM(c, d, FV, PV, N);
+    cout << "The Yield to maturity for these arguments is " << r << " (equivalently " << r*100 << "% )" << endl;
 }
-
-
-
-int main()
-{
-    YTM();
-    
-}
-
-
-
-
-
-
-
-
-
-
